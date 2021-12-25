@@ -1,0 +1,58 @@
+Sub Send_Mail()
+    Const CDO_Cnf = "http://schemas.microsoft.com/cdo/configuration/"
+    Dim oCDOCnf As Object, oCDOMsg As Object
+    Dim SMTPserver As String, sUsername As String, sPass As String, sMsg As String
+    Dim sTo As String, sFrom As String, sSubject As String, sBody As String, sAttachment As String
+    On Error Resume Next
+    'sFrom – как правило совпадает с sUsername
+    SMTPserver = "smtp.yandex.ru"    ' SMTPServer: для Mail.ru "smtp.mail.ru"; для Яндекса "smtp.yandex.ru"; для Рамблера "mail.rambler.ru"
+    sUsername = "YourMail@mail.ru"    ' Учетная запись на сервере
+    sPass = "1234"    ' Пароль к почтовому аккаунту
+ 
+    If Len(SMTPserver) = 0 Then MsgBox "Не указан SMTP сервер", vbInformation, "www.Excel-VBA.ru": Exit Sub
+    If Len(sUsername) = 0 Then MsgBox "Не указана учетная запись", vbInformation, "www.Excel-VBA.ru": Exit Sub
+    If Len(sPass) = 0 Then MsgBox "Не указан пароль", vbInformation, "www.Excel-VBA.ru": Exit Sub
+ 
+    sTo = "AddressTo@mail.ru"    'Кому
+    sFrom = "YourMail@yandex.ru"    'От кого
+    sSubject = "Автоотправка"    'Тема письма
+    sBody = "Привет от Excel-VBA"    'Текст письма
+    sAttachment = "C:/Temp/Книга1.xls"    'Вложение(полный путь к файлу)
+    'Проверка наличия файла по указанному пути
+    If Dir(sAttachment, vbDirectory) = "" Then sAttachment = ""
+    'Назначаем конфигурацию CDO
+    Set oCDOCnf = CreateObject("CDO.Configuration")
+    With oCDOCnf.Fields
+        .Item(CDO_Cnf & "sendusing") = 2
+        .Item(CDO_Cnf & "smtpauthenticate") = 1
+        .Item(CDO_Cnf & "smtpserver") = SMTPserver
+        'если необходимо указать SSL
+        '.Item(CDO_Cnf & "smtpserverport") = 465 'для Яндекса и Gmail 465
+        '.Item(CDO_Cnf & "smtpusessl") = True
+        '=====================================
+        .Item(CDO_Cnf & "sendusername") = sUsername
+        .Item(CDO_Cnf & "sendpassword") = sPass
+        .Update
+    End With
+    'Создаем сообщение
+    Set oCDOMsg = CreateObject("CDO.Message")
+    With oCDOMsg
+        Set .Configuration = oCDOCnf
+        .BodyPart.Charset = "koi8-r"
+        .From = sFrom
+        .To = sTo
+        .Subject = sSubject
+        .TextBody = sBody
+        If Len(sAttachment) > 0 Then .AddAttachment sAttachment
+        .Send
+    End With
+ 
+    Select Case Err.Number
+    Case -2147220973: sMsg = "Нет доступа к Интернет"
+    Case -2147220975: sMsg = "Отказ сервера SMTP"
+    Case 0: sMsg = "Письмо отправлено"
+    Case Else: sMsg = "Ошибка номер: " & Err.Number & vbNewline & "Описание ошибки: " & Err.Description
+    End Select
+    MsgBox sMsg, vbInformation, "www.Excel-VBA.ru"
+    Set oCDOMsg = Nothing: Set oCDOCnf = Nothing
+End Sub

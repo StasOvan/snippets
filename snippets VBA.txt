@@ -1,0 +1,139 @@
+
+
+Dim IE As Object
+
+Set IE = CreateObject("InternetExplorer.Application")
+IE.Visible = True
+
+IE.navigate Sheets("brands").Cells(i, 1) + "?page=" + CStr(page)
+While IE.readyState < 4: DoEvents: Wend
+
+'#############################################################
+Окно выбора файла
+Sub SelectFile()
+    Dim avFiles
+    avFiles = Application.GetOpenFilename _
+                ("XML files(*.xml*),*.xml", 1, "Aua?aou XML oaeeu", , False)
+    If VarType(avFiles) = vbBoolean Then
+        Exit Sub
+    End If
+    Sheets(1).Cells(4, "D") = Mid(avFiles, InStrRev(avFiles, "\") + 1)
+    Sheets(1).Cells(3, "D") = Mid(avFiles, 1, InStrRev(avFiles, "\") - 1)
+End Sub
+
+
+'#############################################################
+Function GetBodyByRQ(ByRef link As String) As String
+    Dim xmlhttp As New MSXML2.XMLHTTP60
+    DoEvents
+    xmlhttp.Open "GET", link, False
+    DoEvents
+    xmlhttp.Send
+    DoEvents
+    GetBodyByRQ = xmlhttp.responseText
+End Function
+
+'#############################################################
+Private Declare PtrSafe Function URLDownloadToFile Lib "urlmon" _
+    Alias "URLDownloadToFileA" (ByVal pCaller As Long, ByVal szURL As String, _
+    ByVal szFileName As String, ByVal dwReserved As Long, ByVal lpfnCB As Long) As Long
+
+Function GetBodyByDL(ByRef link As String) As String
+    Const sTempFileName = "c:\temp\~temp.tmp"
+    Dim h As Boolean
+    
+    h = (URLDownloadToFile(0, link, sTempFileName, 0, 0) = 0)
+    DoEvents
+    
+    If h = True Then
+        With CreateObject("ADODB.Stream")
+            .Type = 2
+            .Charset = "utf-8"
+            .Open
+            .LoadFromFile sTempFileName
+            GetBodyByDL = .ReadText
+            .Close
+        End With
+    Else
+        GetBodyByDL = "False"
+    End If
+    
+    DoEvents
+    'Kill sTempFileName
+    
+End Function
+
+'#########################################################################
+Sub Wait(seconds As Integer)
+      Dim now As Long
+      now = Timer()
+      Do
+          DoEvents
+      Loop While (Timer < now + seconds)
+End Sub
+
+'#########################################################################
+Function responseEmail(temp As String)
+    
+    Dim A() As String
+    Dim B() As String
+    Dim i As Integer
+    Dim x As Integer
+    Dim firstSymbol As String
+    
+    If InStr(temp, ",") Then A = Split(temp, ",")
+    If InStr(temp, " ") Then A = Split(temp, " ")
+    For i = 0 To UBound(A)
+        firstSymbol = Left(A(i), 1)
+        If InStr(A(i), "@") > 0 And InStr(A(i), ".") > 0 And firstSymbol <> "@" Then
+            If Right(A(i), 1) = "," _
+                Or Right(A(i), 1) = ";" _
+                Or Right(A(i), 1) = "." _
+                Or Right(A(i), 1) = "/" Then A(i) = Left(A(i), Len(A(i)) - 1)
+            B = Split(A(i), ",")
+            For x = 0 To UBound(B)
+                firstSymbol = Left(B(x), 1)
+                If InStr(B(x), "@") > 0 And InStr(B(x), ".") > 0 And firstSymbol <> "@" Then
+                    responseEmail = Trim(B(x))
+                End If
+            Next
+        End If
+    Next
+    
+End Function
+
+
+'#########################################################################
+Sub SetClipboardText(ByVal txt$)
+    With GetObject("New:{1C3B4210-F441-11CE-B9EA-00AA006B1A69}")
+        .SetText txt$
+        .PutInClipboard
+    End With
+End Sub
+
+
+сохранение файла
+With CreateObject("ADODB.Stream")
+        .Type = 2
+	.Charset = "UTF-8"
+        .Open
+        .WriteText head + header
+        .SaveToFile Application.ThisWorkbook.Path + "\" + "texst.html", 2
+        .Close
+End With
+
+'#########################################################################
+загрузка файла
+Function LoadTextFromTextFile(ByVal filename$, Optional ByVal encoding$) As String
+    ' функция загружает текст в кодировке Charset$ из файла filename$
+    On Error Resume Next: Dim txt$
+    If Trim(encoding$) = "" Then encoding$ = "windows-1251"
+    With CreateObject("ADODB.Stream")
+        .Type = 2:
+        If Len(encoding$) Then .Charset = encoding$
+        .Open
+        .LoadFromFile filename$        ' загружаем данные из файла
+        LoadTextFromTextFile = .ReadText        ' считываем текст файла
+        .Close
+    End With
+End Function

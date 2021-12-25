@@ -1,0 +1,77 @@
+Класс WebProxy
+Класс WebProxy используется для определения прокси-сервера. Свойства этого класса аналогичны настройкам, которые были рассмотрены вместе с конфигурированием прокси-сервера:
+Класс WebProxy
+Свойства WebProxy	Описание
+Address	Свойство Address имеет тип Uri и определяет URI прокси-сервера, IP-адрес или имя и номер порта.
+BypassList	В свойстве BypassList можно получать и устанавливать в массиве строк URI, которые не должны использовать прокси-сервер.
+BypassArrayList	BypassArrayList — это свойство только для чтения, возвращающее объект типа ArrayList, представляющий URI, которые устанавливаются в свойстве BypassList.
+BypassProxyOnLocal	BypassProxyOnLocal — это логическое свойство, указывающее, должны ли с прокси-сервером использоваться локальные адреса.
+Credentials	Если прокси-сервер требует аутентификации пользователя, в свойстве Credentials можно передать удостоверение личности пользователя.
+Вместо того, чтобы использовать установленный по умолчанию Web-прокси для всех запросов, можно выделить другой прокси для конкретных запросов. Для выбора другого прокси нужно лишь установить свойство Proxy класса WebRequest:
+
+WebProxy wp = new WebProxy("92.168.1.100", true); 
+wp.Credentials = new NetworkCredential("user1", "user1Password"); 
+WebRequest wrq = WebRequest.Create("http://www.example.com"); 
+wrq.Proxy = wp; 
+WebResponse wrs = wrq.GetResponse () ; 
+
+######################################################################
+отключить скрипты в IE
+sub tst()
+    Dim wsh As IWshRuntimeLibrary.WshShell
+    Set wsh = New IWshRuntimeLibrary.WshShell
+    wsh.RegWrite "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Zones\3\1400", "1", "REG_DWORD"
+end sub
+либо 1400", "0", для включения
+
+RegistryKey ChangeSettings = Registry.CurrentUser.OpenSubKey(@"Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\Zones\\3", true);
+// "Active Scripting" - "Disable"          
+ChangeSettings.SetValue("1400", "3", RegistryValueKind.DWord);
+ChangeSettings.Close();
+#######################################################################
+        private void sleep(int msec)
+        {
+            int EndTime;
+            EndTime = (Environment.TickCount & Int32.MaxValue) + msec;
+            while ((Environment.TickCount & Int32.MaxValue) < EndTime) Application.DoEvents(); 
+        }
+#######################################################################
+Чтение больших файлов
+
+static IEnumerable<string> read(string path)
+    {
+        string result = null;
+        using (var fs = new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
+        using (var mmf = MemoryMappedFile.CreateFromFile(fs, null, 0, MemoryMappedFileAccess.ReadWrite, HandleInheritability.None, true))
+        using (var sr = new StreamReader(mmf.CreateViewStream(0, fs.Length)))
+            while ((result = sr.ReadLine()) != null) yield return result;
+    }
+
+
+#######################################################################
+
+пауза
+Public Declare Function GetTickCount Lib "kernel32" () As Long
+
+Public Sub sleep(msec As Integer)
+        Dim EndTime As Integer
+        EndTime = GetTickCount() + msec
+        Do
+            Application.DoEvents()
+        Loop While GetTickCount() < EndTime
+End Sub
+
+#######################################################################
+
+случайное
+  Function genText3()
+        Dim temp As String = ""
+        Dim oRand = New Random()
+        oRand = New Random(DateTime.Now.Millisecond)
+        For i = 1 To 22
+            temp = temp + Chr(oRand.Next(65, 90))
+        Next
+        genText3 = temp
+  End Function
+
+#######################################################################

@@ -1,0 +1,102 @@
+
+<?php
+
+	$host_email = "mail@goreco.ru";
+	$admin_email = "info@goreco.ru";
+	
+	$address = $_GET["address"];
+	$name = $_GET["name"];
+	$email = $_GET["email"];
+	$phone = $_GET["phone"];
+	$name_org = $_GET["name_org"];
+	$inn = $_GET["inn"];
+	$kpp = $_GET["kpp"];
+	$address_org = $_GET["address_org"];
+	$filename = $_GET["filename_pdf"];
+	
+	$full_filename = __DIR__. "/inc/fpdf/" . $filename;
+	$from = "Сайт goreco.ru <".$host_email.">"; 
+
+
+	$subject = "Вы заказывали счет";
+	$message = $name . "!\r\n\r\n";
+    $message .= "Вы запросили счет на сайте goreco.ru. \r\n";
+	$message .= "Счет смотрите в прикрепленных файлах. \r\n";
+
+    if ( send_mail_attach($email, $from, $subject, $message, $full_filename) ) {
+		echo '
+		<div class="modal_content">
+		  <span id="close_modal_window" onclick="close_modal_window()">×</span>
+		  <p>' . $name . '!</p>
+		  <p>!!На ваш емайл <u>'. $email . '</u> выслан счет.</p>
+		</div>
+		';   
+    } else {
+		echo '
+		<div class="modal_content">
+		  <span id="close_modal_window" onclick="close_modal_window()">×</span>
+		  <p>ЧТО-ТО ПОШЛО НЕ ТАК!</p>
+		</div>
+		';   
+	}
+
+
+	$subject = "Выставлен счет!";
+	$message = "Пользователь: $name \n\n";
+    $message .= "запросил счет на сумму 0000. \n\n";
+	$message .= "Адрес факта: $address \n";
+	$message .= "Телефон: $phone \n";
+	$message .= "Email: $email \n\n";
+	$message .= "Название организации: $name_org \n";
+	$message .= "ИНН $inn \n";
+	$message .= "КПП $kpp \n";
+	$message .= "Юридический адрес: $address_org \n";
+	
+	if ( send_mail_attach($admin_email, $from, $subject, $message, $full_filename) ) {
+		
+    } else {
+		echo '
+		<div class="modal_content">
+		  <span id="close_modal_window" onclick="close_modal_window()">×</span>
+		  <p>ЧТО-ТО ПОШЛО НЕ ТАК!</p>
+		</div>
+		flag = $flag
+		';
+	}
+
+
+	// функция для отправки почтового сообщения с вложением 
+	function send_mail_attach($to, $from, $subject, $body, $path) 
+	{
+		$fp = fopen($path,"r"); 
+		$file = fread($fp, filesize($path)); 
+		fclose($fp); 
+
+		$boundary = "--".md5(uniqid(time())); // генерируем разделитель 
+		
+		$headers .= "MIME-Version: 1.0\n"; 
+		$headers .= "Content-Type: multipart/mixed; boundary=\"$boundary\"\n"; 
+		$headers .= "From: " . $from;
+		
+		$multipart .= "--$boundary\n"; 
+		$multipart .= "Content-Type: text/html; charset=windows-1251\n"; 
+		$multipart .= "Content-Transfer-Encoding: base64\n\n"; 
+		$multipart .= chunk_split(base64_encode(iconv("utf8", "windows-1251", $body)));
+		
+		$message_part = "--$boundary\n"; 
+		$message_part .= "Content-Type: application/octet-stream\n"; 
+		$message_part .= "Content-Transfer-Encoding: base64\n"; 
+		$message_part .= "Content-Disposition: attachment; filename = \"Счет ".basename($path)."\"\n\n";
+		$message_part .= chunk_split(base64_encode($file))."\n"; 
+		
+		$multipart .= $message_part."--$boundary--\n"; 
+
+		if (mail($to, $subject, $multipart, $headers)) {
+			return true;
+		} else {
+			return false;
+		} 
+	}
+
+	
+?>
