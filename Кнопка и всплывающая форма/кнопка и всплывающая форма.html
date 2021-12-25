@@ -1,0 +1,112 @@
+
+
+(( это пример с кнопкой "Следить за ценой" ))
+
+
+Этот div вставляется в разметку страницы HTML 
+
+<div class="look-for-price" 
+   style="
+	color: #fff;
+	float: left;
+	margin-top: 46px;
+	margin-left: 30px;
+	border: 1px solid #fff;
+	background-color: #0ba;
+	border-radius: 50px;
+	padding: 8px 15px;
+	font-weight: bold;
+	font-size: 1.5rem;
+	cursor: pointer;
+	box-shadow: 0 6px 10px -1px rgba(0, 187, 170, .2);">
+   
+   <i class="fa fa-envelope"></i>
+	<span>&nbsp;Следить за ценой</span>
+</div>
+
+###########################################################
+
+
+
+Это div со всплывающей формой (может быть в любом месте в разметки HTML
+			
+<div class="backpopup"></div>
+<div class="popup-window">
+	<p class="closePopUp">&#10006;</p>
+	<p id="textPopup">Присылать мне уведомления, если цена на объект изменилась.</p>
+	<form id="formMail" action="" method="post">
+		<input type="email" id="email" 
+			style="
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0 0 4px;
+				width: 100%;
+				outline: none;
+				border: none;
+				border-bottom: 1px solid rgb(0,187,170);" 
+				placeholder="введите Ваш емайл" value="" autocomplete="on"/>
+		
+		<p style="text-align:right; padding: 0">
+			<input style="
+				background-color: rgb(0,187,170);
+				border: none;
+				cursor: pointer;
+				margin-top: 10px;
+				color: white;
+				padding: 5px 15px 3px;
+				" 
+				type="submit" value="ПОДПИСАТЬСЯ"/>
+	   </p>
+   </form>
+</div>
+
+###########################################################
+
+
+Это скрипты. Желательно вставить в конец страницы.
+
+<script src="//yastatic.net/jquery/2.1.4/jquery.min.js"></script>
+<script type="text/javascript">
+	$.fn.popup = function() { 
+		this.css('position', 'fixed').fadeIn();
+		this.css('top', ($(window).height() - this.height()) / 2 - 90 + 'px');
+		this.css('left', ($(window).width() - this.width()) / 2 - 50  + 'px');
+		$('.backpopup').fadeIn();
+	}
+	$(document).ready(function(){
+		$('.look-for-price').click(function(){
+			$('.popup-window').popup();
+		});
+		$('.backpopup,.closePopUp').click(function(){
+			$('.popup-window').fadeOut();
+			$('.backpopup').fadeOut();
+		});
+	});
+	
+</script>
+<script>
+	$("#formMail").submit(function(e){
+        e.preventDefault();
+        
+        res = $.ajax({
+            type: "POST",
+            url: "/mail.php", 
+            data: {
+                email: document.getElementById('email').value,
+                url: window.location.href,
+                title: document.title
+            },
+            success: function() {
+                document.getElementById("textPopup").innerHTML = 'Спасибо, Ваша заявка отправлена!';
+        		 
+        		this.css('left', ($(window).width() - this.width()) / 2 - 50  + 'px');
+
+                $("#formMail").hide();
+               
+            }
+        });
+
+        console.log(res);
+    });
+    
+</script>
