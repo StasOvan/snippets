@@ -1,10 +1,10 @@
 <script>
 $(window).load(function() {
     setTimeout(function() {
-        var a = "ti", 
-            b = "ldac",
-            c = "opy";
-        document.getElementById(a + b + c).style.display = none;
+        var a = 'ti', 
+            b = 'ldac',
+            c = 'opy';
+        document.getElementById(a + b + c).style.display = 'none';
     }, 500);
 });
 </script>
