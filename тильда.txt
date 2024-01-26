@@ -1,17 +1,8 @@
 <script>
 $(window).load(function() {
     setTimeout(function() {
-       var a = "ti", b="ldac", c="opy";
-      
-        //if (document.getElementById(a+b+c)) {
-            document.getElementById(a+b+c).setAttribute("style","display: none;");
-
-       //     console.log("true1");   
-        
-    
-    }, 500);  
-    //document.getElementById("tildacоpy").setAttribute("style","display: none;");
-    //document.getElementById("tildacоpy").setAttribute("style","display: none;");
+        var a = "ti", b="ldac", c="opy";
+        document.getElementById(a+b+c).setAttribute("style","display: none;");
+    }, 500);
 });
-
 </script>
